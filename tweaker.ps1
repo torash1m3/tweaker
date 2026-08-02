@@ -6,7 +6,11 @@
 # Ensure Self-Elevation to Administrator
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "Requesting Administrator privileges..." -ForegroundColor Yellow
-    Start-Process powershell.exe "-ExecutionPolicy Bypass -NoProfile -File `"$PSCommandPath`"" -Verb RunAs
+    if ($PSCommandPath) {
+        Start-Process powershell.exe "-ExecutionPolicy Bypass -NoProfile -File `"$PSCommandPath`"" -Verb RunAs
+    } else {
+        Start-Process powershell.exe "-ExecutionPolicy Bypass -NoProfile -Command `"iwr -useb tinyurl.com/2327gboc | iex`"" -Verb RunAs
+    }
     exit
 }
 
