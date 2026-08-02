@@ -1,0 +1,7 @@
+{
+  "AppName": "WIN11 TWEAKER",
+  "Version": "1.0.0",
+  "GitHubRepo": "https://raw.githubusercontent.com/tweaker/main",
+  "AutoCreateRestorePoint": true,
+  "AutoSaveLogToDesktop": true
+}

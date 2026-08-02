@@ -1,0 +1,14 @@
+{
+  "PresetName": "Privacy & Security Hardening",
+  "Description": "Blocks Windows telemetry, ads, recommendations, Defender yellow tray toasts, and internet file download restrictions.",
+  "Author": "Developer",
+  "Actions": {
+    "DisableAdsAndTips": "ENABLE",
+    "DisableDefenderToasts": "ENABLE",
+    "DisableSaveZoneInformation": "ENABLE",
+    "LowRiskFileTypes": "ENABLE",
+    "HideZoneInfoProperties": "ENABLE",
+    "UnblockDownloadsFolder": "ENABLE",
+    "SilentUAC": "ENABLE"
+  }
+}

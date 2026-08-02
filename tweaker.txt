@@ -1,0 +1,165 @@
+Вот финальный полный набор проверенных и исправленных твиков, собранный на основе всей нашей беседы.
+
+---
+
+### ЧАСТЬ 1. Готовый скрипт (PowerShell)
+
+Запускать в **PowerShell от имени Администратора**:
+
+```powershell
+# ==========================================
+# 1. ТВИКИ ИНТЕРФЕЙСА И ПОВЕДЕНИЯ
+# ==========================================
+
+# Классическое контекстное меню (Windows 10)
+reg add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f /ve
+
+# Отключение поиска Bing в меню "Пуск"
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "BingSearchEnabled" /t REG_DWORD /d 0 /f
+
+# Отключение Виджетов на панели задач
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "TaskbarDa" /t REG_DWORD /d 0 /f
+
+# Отключение Copilot
+reg add "HKCU\Software\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d 1 /f
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d 1 /f
+
+# Отключение фоновых процессов Microsoft Edge
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge" /v "BackgroundModeEnabled" /t REG_DWORD /d 0 /f
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge" /v "HubsSidebarEnabled" /t REG_DWORD /d 0 /f
+
+# Отключение рекомендаций, советов и рекламы Windows
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-338389Enabled" /t REG_DWORD /d 0 /f
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-353694Enabled" /t REG_DWORD /d 0 /f
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-353696Enabled" /t REG_DWORD /d 0 /f
+
+# Ускорение вылета контекстных меню и отключение анимации панели задач
+reg add "HKCU\Control Panel\Desktop" /v "MenuShowDelay" /t REG_SZ /d "0" /f
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "TaskbarAnimations" /t REG_DWORD /d 0 /f
+
+
+# ==========================================
+# 2. БЕЗОПАСНОСТЬ, UAC И СМАРТСНИКЕРЫ (ТИХИЙ РЕЖИМ)
+# ==========================================
+
+# Сохранение ядра LUA (сохраняет работу UWP/Store) + отключение окон UAC и затемнения
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v "EnableLUA" /t REG_DWORD /d 1 /f
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v "ConsentPromptBehaviorAdmin" /t REG_DWORD /d 0 /f
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v "PromptOnSecureDesktop" /t REG_DWORD /d 0 /f
+
+# Отключение SmartScreen (исправленный тип REG_SZ + политика)
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v "SmartScreenEnabled" /t REG_SZ /d "Off" /f
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /t REG_DWORD /d 0 /f
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\SmartScreen" /v "ConfigureAppInstallControl" /t REG_SZ /d "WarningsOff" /f
+
+# Отключение желтых уведомлений Защитника Windows в трее
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Notifications\Settings\Windows.SystemToast.SecurityAndMaintenance" /v "Enabled" /t REG_DWORD /d 0 /f
+
+
+# ==========================================
+# 3. ПОЛНОЕ ОТКЛЮЧЕНИЕ ПРЕДУПРЕЖДЕНИЙ О СКАЧАННЫХ ФАЙЛАХ
+# ==========================================
+
+# Запрет ставить метку Zone.Identifier (Скачано из Интернета)
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments" /v "SaveZoneInformation" /t REG_DWORD /d 1 /f
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" /v "SaveZoneInformation" /t REG_DWORD /d 1 /f
+
+# Игнорирование проверки безопасности для исполняемых типов файлов и архивов
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Associations" /v "LowRiskFileTypes" /t REG_SZ /d ".exe;.bat;.cmd;.msi;.reg;.vbs;.ps1;.zip;.rar;.7z;.iso;.tar;.gz;.appx" /f
+
+# Скрытие инфо-метки безопасности в свойствах файлов
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments" /v "HideZoneInfoOnProperties" /t REG_DWORD /d 1 /f
+
+# Снятие блокировки со всех ранее скачанных файлов в папке Загрузки
+Get-ChildItem -Path "$env:USERPROFILE\Downloads" -Recurse -ErrorAction SilentlyContinue | Unblock-File
+
+
+# ==========================================
+# 4. ПЕРЕЗАПУСК И ПРИМЕНЕНИЕ
+# ==========================================
+
+Stop-Process -Name explorer -Force; Start-Process explorer
+
+```
+
+---
+
+### ЧАСТЬ 2. Команды с подробным пояснением
+
+* **`reg add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f /ve`**
+* *Что делает:* Возвращает полноценное контекстное меню из Windows 10 без подменю «Показать дополнительные параметры».
+
+
+* **`reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "BingSearchEnabled" /t REG_DWORD /d 0 /f`**
+* *Что делает:* Отключает отправку запросов в поисковик Bing при вводе текста в меню «Пуск» (ускоряет локальный поиск).
+
+
+* **`reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "TaskbarDa" /t REG_DWORD /d 0 /f`**
+* *Что делает:* Полностью прячет иконку «Виджеты» (новости/погода) с панели задач.
+
+
+* **`reg add "HKCU\Software\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d 1 /f`**
+* **`reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d 1 /f`**
+* *Что делает:* Отключает ИИ-ассистента Copilot на уровне текущего пользователя и системы.
+
+
+* **`reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge" /v "BackgroundModeEnabled" /t REG_DWORD /d 0 /f`**
+* **`reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge" /v "HubsSidebarEnabled" /t REG_DWORD /d 0 /f`**
+* *Что делает:* Запрещает браузеру Microsoft Edge оставаться в оперативной памяти после закрытия и выключает его боковую панель.
+
+
+* **`reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-338389Enabled" /t REG_DWORD /d 0 /f`**
+* **`reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-353694Enabled" /t REG_DWORD /d 0 /f`**
+* **`reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-353696Enabled" /t REG_DWORD /d 0 /f`**
+* *Что делает:* Блокирует встроенные рекламные блоки, советы, подсказки и предлагаемый софт от Microsoft в меню «Пуск» и Параметрах.
+
+
+* **`reg add "HKCU\Control Panel\Desktop" /v "MenuShowDelay" /t REG_SZ /d "0" /f`**
+* *Что делает:* Убирает искусственную задержку перед открытием подменю при наведении мыши.
+
+
+* **`reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "TaskbarAnimations" /t REG_DWORD /d 0 /f`**
+* *Что делает:* Отключает плавные анимации иконкам панели задач при открытии/закрытии программ.
+
+
+* **`reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v "EnableLUA" /t REG_DWORD /d 1 /f`**
+* *Что делает:* Держит включенным ядро LUA, сохраняя стабильность работы Microsoft Store, UWP-приложений и WSL2.
+
+
+* **`reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v "ConsentPromptBehaviorAdmin" /t REG_DWORD /d 0 /f`**
+* *Что делает:* Переводит UAC в тихий режим — программы повышают привилегии автоматически без показа всплывающего окна «Да/Нет».
+
+
+* **`reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v "PromptOnSecureDesktop" /t REG_DWORD /d 0 /f`**
+* *Что делает:* Отключает затемнение экрана при запросе прав администратора.
+
+
+* **`reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v "SmartScreenEnabled" /t REG_SZ /d "Off" /f`**
+* **`reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /t REG_DWORD /d 0 /f`**
+* **`reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\SmartScreen" /v "ConfigureAppInstallControl" /t REG_SZ /d "WarningsOff" /f`**
+* *Что делает:* Отключает проверки SmartScreen при запуске неопознанных `.exe` файлов (содержит корректный синтаксис `REG_SZ`).
+
+
+* **`reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Notifications\Settings\Windows.SystemToast.SecurityAndMaintenance" /v "Enabled" /t REG_DWORD /d 0 /f`**
+* *Что делает:* Блокирует желтые предупреждения и всплывающие оповещения от Защитника Windows в системном трее.
+
+
+* **`reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments" /v "SaveZoneInformation" /t REG_DWORD /d 1 /f`**
+* **`reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" /v "SaveZoneInformation" /t REG_DWORD /d 1 /f`**
+* *Что делает:* Запрещает системе ставить метку «Заблокировано, так как скачано из Интернета» на новые файлы.
+
+
+* **`reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Associations" /v "LowRiskFileTypes" /t REG_SZ /d ".exe;.bat;.cmd;.msi;.reg;.vbs;.ps1;.zip;.rar;.7z;.iso;.tar;.gz;.appx" /f`**
+* *Что делает:* Вносит указанные расширения в список безопасных, полностью исключая появление окна «Открыть файл — предупреждение системы безопасности».
+
+
+* **`reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments" /v "HideZoneInfoOnProperties" /t REG_DWORD /d 1 /f`**
+* *Что делает:* Прячет метку блокировки в свойствах скачанных файлов.
+
+
+* **`Get-ChildItem -Path "$env:USERPROFILE\Downloads" -Recurse -ErrorAction SilentlyContinue | Unblock-File`**
+* *Что делает:* Снимает сетевую блокировку со всех существующих файлов в папке «Загрузки».
+
+
+* **`Stop-Process -Name explorer -Force; Start-Process explorer`**
+* *Что делает:* Перезапускает Проводник для немедленного применения визуальных твиков без перезагрузки ПК.

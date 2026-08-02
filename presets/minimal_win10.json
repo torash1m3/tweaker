@@ -1,0 +1,10 @@
+{
+  "PresetName": "Minimal Win10 Feel",
+  "Description": "Restores classic Windows 10 context menu and configures quiet UAC mode.",
+  "Author": "Developer",
+  "Actions": {
+    "ClassicContextMenu": "ENABLE",
+    "SilentUAC": "ENABLE",
+    "DisableWidgets": "ENABLE"
+  }
+}
