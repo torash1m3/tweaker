@@ -13,8 +13,10 @@ To run **WIN11 TWEAKER** on a clean Windows 11 system (no installation or extern
 Open **PowerShell as Administrator** and execute:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/torash1m3/tweaker/main/tweaker.ps1 | iex"
+powershell -ExecutionPolicy Bypass -Command "iwr -useb tinyurl.com/2327gboc | iex"
 ```
+
+> **Full Raw Link:** `https://raw.githubusercontent.com/torash1m3/tweaker/main/tweaker.ps1`
 
 ---
 
@@ -49,12 +51,10 @@ tweaker/
 
 ---
 
-## 🛠️ Short Link Setup
+## 🛠️ Short Link Options
 
-To shorten your one-liner command even further:
-1. Copy raw URL: `https://raw.githubusercontent.com/torash1m3/tweaker/main/tweaker.ps1`
-2. Shorten using [is.gd](https://is.gd) or [clck.ru](https://clck.ru) (e.g. `is.gd/mywin11`)
-3. Now run on fresh Win11 with:
-   ```powershell
-   powershell -ExecutionPolicy Bypass -Command "iwr -useb is.gd/mywin11 | iex"
-   ```
+- **TinyURL (Active Shortener):** `https://tinyurl.com/2327gboc`
+- **Short Command:**
+  ```powershell
+  powershell -ExecutionPolicy Bypass -Command "iwr -useb tinyurl.com/2327gboc | iex"
+  ```
