@@ -2,7 +2,7 @@
 
 A zero-dependency, single-command Terminal User Interface (TUI) Windows 11 system optimizer written in pure PowerShell 5.1 / 7+.
 
-![TUI Interface](https://img.shields.io/badge/Windows-11-blue.svg) ![PowerShell](https://img.shields.io/badge/PowerShell-5.1%20%7C%207%2B-blueviolet.svg)
+![Windows 11](https://img.shields.io/badge/Windows-11-blue.svg) ![PowerShell](https://img.shields.io/badge/PowerShell-5.1%20%7C%207%2B-blueviolet.svg)
 
 ---
 
@@ -13,7 +13,7 @@ To run **WIN11 TWEAKER** on a clean Windows 11 system (no installation or extern
 Open **PowerShell as Administrator** and execute:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/YOUR_USERNAME/tweaker/main/tweaker.ps1 | iex"
+powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/torash1m3/tweaker/main/tweaker.ps1 | iex"
 ```
 
 ---
@@ -49,20 +49,12 @@ tweaker/
 
 ---
 
-## 🛠️ GitHub Push & Short Link Setup
+## 🛠️ Short Link Setup
 
-1. **Initialize Git and push to GitHub:**
+To shorten your one-liner command even further:
+1. Copy raw URL: `https://raw.githubusercontent.com/torash1m3/tweaker/main/tweaker.ps1`
+2. Shorten using [is.gd](https://is.gd) or [clck.ru](https://clck.ru) (e.g. `is.gd/mywin11`)
+3. Now run on fresh Win11 with:
    ```powershell
-   git init
-   git add .
-   git commit -m "Initial release v1.0"
-   gh repo create tweaker --public --source=. --remote=origin --push
+   powershell -ExecutionPolicy Bypass -Command "iwr -useb is.gd/mywin11 | iex"
    ```
-
-2. **Shorten URL for fast typing:**
-   - Copy raw URL: `https://raw.githubusercontent.com/YOUR_USERNAME/tweaker/main/tweaker.ps1`
-   - Shorten using [is.gd](https://is.gd) or [clck.ru](https://clck.ru) (e.g. `is.gd/mywin11`)
-   - Now run on fresh Win11 with:
-     ```powershell
-     powershell -ExecutionPolicy Bypass -Command "iwr -useb is.gd/mywin11 | iex"
-     ```
