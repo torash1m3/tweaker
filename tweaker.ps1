@@ -406,13 +406,13 @@ function Draw-TUI {
                 $isSel = ($script:ActiveItemIndex -eq 0)
                 $tStr = "[CREATE] Create New System Restore Point"
                 if ($isSel -and $script:FocusPanel -eq "ITEMS") { $rightItem = "$BG_CYAN> $tStr$RESET" }
-                elseif ($isSel) { $rightItem = "$CYAN> $tStr$RESET" }
+                elseif ($isSel) { $rightItem = "$CYAN$tStr$RESET" }
                 else { $rightItem = "  $tStr" }
             } elseif ($i -eq 1) {
                 $isSel = ($script:ActiveItemIndex -eq 1)
                 $tStr = "[OPEN] Launch Windows Restore GUI (rstrui)"
                 if ($isSel -and $script:FocusPanel -eq "ITEMS") { $rightItem = "$BG_CYAN> $tStr$RESET" }
-                elseif ($isSel) { $rightItem = "$CYAN> $tStr$RESET" }
+                elseif ($isSel) { $rightItem = "$CYAN$tStr$RESET" }
                 else { $rightItem = "  $tStr" }
             }
         } else {
@@ -431,8 +431,8 @@ function Draw-TUI {
                 
                 $sysState = if (& $t.CheckCode) { "$GREEN[SYS: ON]$RESET" } else { "$GRAY[SYS: OFF]$RESET" }
                 $tTitle = $t.Title
-                if ($tTitle.Length -gt 28) { $tTitle = $tTitle.Substring(0, 25) + "..." }
-                $tTitlePadded = $tTitle.PadRight(28)
+                if ($tTitle.Length -gt 32) { $tTitle = $tTitle.Substring(0, 29) + "..." }
+                $tTitlePadded = $tTitle.PadRight(32)
                 
                 if ($isSel -and $script:FocusPanel -eq "ITEMS") {
                     $rightItem = "$BG_CYAN> $actSymbol $tTitlePadded $sysState$RESET"
@@ -451,19 +451,24 @@ function Draw-TUI {
     $divMid = "$CYAN$CH_LT" + ($CH_H * 25) + $CH_CROSS + ($CH_H * 52) + "$CH_RT$RESET"
     Write-Host $divMid
 
-    # Description Line
+    # Description Line Format: Full Title FIRST, then explanation
     $descText = "Hover over an item to view description."
     if ($catName -in @("Interface", "Security", "File Warnings")) {
         $categoryTweaks = @($script:Tweaks | Where-Object { $_.Category -eq $catName })
         if ($script:ActiveItemIndex -lt $categoryTweaks.Count) {
             $t = $categoryTweaks[$script:ActiveItemIndex]
-            $descText = "INFO: $($t.Description)"
+            $descText = "INFO: [$($t.Title)] - $($t.Description)"
         }
     } elseif ($catName -eq "Presets") {
         $presetKeys = @($script:LocalPresets.Keys)
         if ($script:ActiveItemIndex -lt $presetKeys.Count) {
             $pName = $presetKeys[$script:ActiveItemIndex]
-            $descText = "PRESET: $($script:LocalPresets[$pName].Description)"
+            $descText = "PRESET: [$pName] - $($script:LocalPresets[$pName].Description)"
+        }
+    } elseif ($catName -eq "Winget Software") {
+        if ($script:ActiveItemIndex -lt $script:WingetApps.Count) {
+            $app = $script:WingetApps[$script:ActiveItemIndex]
+            $descText = "APP: [$($app.Name)] - Package ID: $($app.Id)"
         }
     }
     
