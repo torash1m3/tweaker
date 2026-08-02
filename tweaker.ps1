@@ -9,7 +9,7 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     if ($PSCommandPath) {
         Start-Process powershell.exe "-ExecutionPolicy Bypass -NoProfile -File `"$PSCommandPath`"" -Verb RunAs
     } else {
-        Start-Process powershell.exe "-ExecutionPolicy Bypass -NoProfile -Command `"iwr -useb tinyurl.com/2327gboc | iex`"" -Verb RunAs
+        Write-Host "Please re-run this script in PowerShell launched as Administrator." -ForegroundColor Red
     }
     exit
 }
@@ -58,14 +58,16 @@ $CH_BT    = [string][char]0x2569 # ╩
 $CH_CROSS = [string][char]0x256C # ╬
 
 # ------------------------------------------------------------------------------
-# Tweak Registry Definitions
+# Tweak Registry & Policy Definitions
 # ------------------------------------------------------------------------------
 $script:Tweaks = @(
+    # INTERFACE TWEAKS
     @{
         Id          = "ClassicContextMenu"
         Category    = "Interface"
-        Title       = "Classic Win10 Context Menu"
-        Description = "Restores traditional right-click menu without 'Show more options'"
+        Title       = "Classic Context Menu"
+        ShortTitle  = "Classic Context..."
+        Description = "Restores traditional Windows 10 right-click menu without 'Show more options'"
         CheckCode   = { Test-Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" }
         ApplyCode   = { reg add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f /ve | Out-Null }
         UndoCode    = { reg delete "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}" /f 2>$null | Out-Null }
@@ -74,7 +76,8 @@ $script:Tweaks = @(
         Id          = "DisableBingSearch"
         Category    = "Interface"
         Title       = "Disable Bing in Start Menu"
-        Description = "Prevents Start menu from querying Bing online search"
+        ShortTitle  = "Disable Bing..."
+        Description = "Prevents Start menu from querying Bing online search for faster local search"
         CheckCode   = { (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "BingSearchEnabled" -ErrorAction SilentlyContinue).BingSearchEnabled -eq 0 }
         ApplyCode   = { reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "BingSearchEnabled" /t REG_DWORD /d 0 /f | Out-Null }
         UndoCode    = { reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "BingSearchEnabled" /f 2>$null | Out-Null }
@@ -83,7 +86,8 @@ $script:Tweaks = @(
         Id          = "DisableWidgets"
         Category    = "Interface"
         Title       = "Disable Taskbar Widgets"
-        Description = "Hides news and weather widget icon from taskbar"
+        ShortTitle  = "Disable Widgets..."
+        Description = "Hides news and weather widget icon from Windows 11 taskbar"
         CheckCode   = { (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarDa" -ErrorAction SilentlyContinue).TaskbarDa -eq 0 }
         ApplyCode   = { reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "TaskbarDa" /t REG_DWORD /d 0 /f | Out-Null }
         UndoCode    = { reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "TaskbarDa" /t REG_DWORD /d 1 /f | Out-Null }
@@ -92,7 +96,8 @@ $script:Tweaks = @(
         Id          = "DisableCopilot"
         Category    = "Interface"
         Title       = "Disable Windows Copilot AI"
-        Description = "Disables Windows Copilot on HKCU and HKLM policy level"
+        ShortTitle  = "Disable Copilot..."
+        Description = "Disables Windows Copilot AI assistant on HKCU and HKLM policy level"
         CheckCode   = { (Get-ItemProperty -Path "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot" -Name "TurnOffWindowsCopilot" -ErrorAction SilentlyContinue).TurnOffWindowsCopilot -eq 1 }
         ApplyCode   = {
             reg add "HKCU\Software\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d 1 /f | Out-Null
@@ -106,8 +111,9 @@ $script:Tweaks = @(
     @{
         Id          = "DisableEdgeBackground"
         Category    = "Interface"
-        Title       = "Disable MS Edge Background"
-        Description = "Prevents MS Edge from lingering in memory after exit"
+        Title       = "Disable MS Edge Background Tasks"
+        ShortTitle  = "Edge Background..."
+        Description = "Prevents Microsoft Edge from lingering in RAM and running background tasks"
         CheckCode   = { (Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "BackgroundModeEnabled" -ErrorAction SilentlyContinue).BackgroundModeEnabled -eq 0 }
         ApplyCode   = {
             reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge" /v "BackgroundModeEnabled" /t REG_DWORD /d 0 /f | Out-Null
@@ -122,7 +128,8 @@ $script:Tweaks = @(
         Id          = "DisableAdsAndTips"
         Category    = "Interface"
         Title       = "Disable Recommendations & Ads"
-        Description = "Blocks suggested apps, tips, and ads in Start & Settings"
+        ShortTitle  = "Disable Recommendations..."
+        Description = "Blocks suggested apps, tips, and ads in Start menu & Settings app"
         CheckCode   = { (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-338389Enabled" -ErrorAction SilentlyContinue)."SubscribedContent-338389Enabled" -eq 0 }
         ApplyCode   = {
             reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-338389Enabled" /t REG_DWORD /d 0 /f | Out-Null
@@ -139,7 +146,8 @@ $script:Tweaks = @(
         Id          = "MenuShowDelayZero"
         Category    = "Interface"
         Title       = "Instant Sub-Menu Popup (0ms)"
-        Description = "Removes artificial delay when hovering sub-menus"
+        ShortTitle  = "Instant Submenu..."
+        Description = "Removes artificial delay when hovering sub-menus for instant response"
         CheckCode   = { (Get-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "MenuShowDelay" -ErrorAction SilentlyContinue).MenuShowDelay -eq "0" }
         ApplyCode   = { reg add "HKCU\Control Panel\Desktop" /v "MenuShowDelay" /t REG_SZ /d "0" /f | Out-Null }
         UndoCode    = { reg add "HKCU\Control Panel\Desktop" /v "MenuShowDelay" /t REG_SZ /d "400" /f | Out-Null }
@@ -148,16 +156,20 @@ $script:Tweaks = @(
         Id          = "DisableTaskbarAnimations"
         Category    = "Interface"
         Title       = "Disable Taskbar Animations"
-        Description = "Disables subtle pop animations for taskbar icons"
+        ShortTitle  = "Taskbar Animations..."
+        Description = "Disables subtle pop animations for taskbar icons for snappier feel"
         CheckCode   = { (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarAnimations" -ErrorAction SilentlyContinue).TaskbarAnimations -eq 0 }
         ApplyCode   = { reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "TaskbarAnimations" /t REG_DWORD /d 0 /f | Out-Null }
         UndoCode    = { reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "TaskbarAnimations" /t REG_DWORD /d 1 /f | Out-Null }
     },
+
+    # SECURITY & TELEMETRY TWEAKS (Point 9: ShutUp10 Style)
     @{
         Id          = "SilentUAC"
-        Category    = "Security"
+        Category    = "Security & Privacy"
         Title       = "Silent UAC Mode (Keep LUA)"
-        Description = "Auto-elevates admin programs without prompt/dimming while keeping LUA"
+        ShortTitle  = "Silent UAC..."
+        Description = "Auto-elevates admin programs without prompt or screen dimming while preserving LUA/Store"
         CheckCode   = { (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ConsentPromptBehaviorAdmin" -ErrorAction SilentlyContinue).ConsentPromptBehaviorAdmin -eq 0 }
         ApplyCode   = {
             reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v "EnableLUA" /t REG_DWORD /d 1 /f | Out-Null
@@ -171,9 +183,10 @@ $script:Tweaks = @(
     },
     @{
         Id          = "DisableSmartScreen"
-        Category    = "Security"
+        Category    = "Security & Privacy"
         Title       = "Disable SmartScreen Warnings"
-        Description = "Suppresses 'Windows protected your PC' for unknown EXEs"
+        ShortTitle  = "Disable SmartScreen..."
+        Description = "Suppresses 'Windows protected your PC' warnings for unknown executables"
         CheckCode   = { (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" -Name "SmartScreenEnabled" -ErrorAction SilentlyContinue).SmartScreenEnabled -eq "Off" }
         ApplyCode   = {
             reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v "SmartScreenEnabled" /t REG_SZ /d "Off" /f | Out-Null
@@ -188,18 +201,69 @@ $script:Tweaks = @(
     },
     @{
         Id          = "DisableDefenderToasts"
-        Category    = "Security"
+        Category    = "Security & Privacy"
         Title       = "Disable Defender Tray Toasts"
-        Description = "Blocks yellow tray warnings and notifications from Defender"
+        ShortTitle  = "Defender Toasts..."
+        Description = "Blocks yellow tray warnings and security notifications from Windows Defender"
         CheckCode   = { (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Notifications\Settings\Windows.SystemToast.SecurityAndMaintenance" -Name "Enabled" -ErrorAction SilentlyContinue).Enabled -eq 0 }
         ApplyCode   = { reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Notifications\Settings\Windows.SystemToast.SecurityAndMaintenance" /v "Enabled" /t REG_DWORD /d 0 /f | Out-Null }
         UndoCode    = { reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Notifications\Settings\Windows.SystemToast.SecurityAndMaintenance" /v "Enabled" /t REG_DWORD /d 1 /f | Out-Null }
     },
     @{
+        Id          = "DisableTelemetryData"
+        Category    = "Security & Privacy"
+        Title       = "Disable Telemetry Data Collection"
+        ShortTitle  = "Disable Telemetry..."
+        Description = "Sets Windows diagnostic data collection level to Security/Minimal (Level 0)"
+        CheckCode   = { (Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -ErrorAction SilentlyContinue).AllowTelemetry -eq 0 }
+        ApplyCode   = {
+            reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d 0 /f | Out-Null
+            reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d 0 /f | Out-Null
+        }
+        UndoCode    = {
+            reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v "AllowTelemetry" /f 2>$null | Out-Null
+        }
+    },
+    @{
+        Id          = "DisableActivityHistory"
+        Category    = "Security & Privacy"
+        Title       = "Disable Activity History & Timeline"
+        ShortTitle  = "Activity History..."
+        Description = "Prevents Windows from storing user activity history and sending it to Microsoft"
+        CheckCode   = { (Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "PublishUserActivities" -ErrorAction SilentlyContinue).PublishUserActivities -eq 0 }
+        ApplyCode   = {
+            reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "PublishUserActivities" /t REG_DWORD /d 0 /f | Out-Null
+            reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "EnableActivityFeed" /t REG_DWORD /d 0 /f | Out-Null
+        }
+        UndoCode    = {
+            reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "PublishUserActivities" /f 2>$null | Out-Null
+            reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "EnableActivityFeed" /f 2>$null | Out-Null
+        }
+    },
+    @{
+        Id          = "DisableAdvertisingID"
+        Category    = "Security & Privacy"
+        Title       = "Disable Advertising ID Tracking"
+        ShortTitle  = "Advertising ID..."
+        Description = "Prevents apps from using Windows Advertising ID for personalized ad tracking"
+        CheckCode   = { (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" -Name "Enabled" -ErrorAction SilentlyContinue).Enabled -eq 0 }
+        ApplyCode   = {
+            reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v "Enabled" /t REG_DWORD /d 0 /f | Out-Null
+            reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo" /v "DisabledByGroupPolicy" /t REG_DWORD /d 1 /f | Out-Null
+        }
+        UndoCode    = {
+            reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /v "Enabled" /t REG_DWORD /d 1 /f | Out-Null
+            reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo" /v "DisabledByGroupPolicy" /f 2>$null | Out-Null
+        }
+    },
+
+    # FILE WARNINGS TWEAKS
+    @{
         Id          = "DisableSaveZoneInformation"
         Category    = "File Warnings"
         Title       = "Disable Zone.Identifier Tag"
-        Description = "Prevents Windows from marking downloaded files as blocked"
+        ShortTitle  = "Zone.Identifier Tag..."
+        Description = "Prevents Windows from tagging downloaded internet files as blocked"
         CheckCode   = { (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Name "SaveZoneInformation" -ErrorAction SilentlyContinue).SaveZoneInformation -eq 1 }
         ApplyCode   = {
             reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments" /v "SaveZoneInformation" /t REG_DWORD /d 1 /f | Out-Null
@@ -214,7 +278,8 @@ $script:Tweaks = @(
         Id          = "LowRiskFileTypes"
         Category    = "File Warnings"
         Title       = "Trust Executables & Archives"
-        Description = "Suppresses security prompts for .exe, .bat, .zip, .7z, .iso"
+        ShortTitle  = "Trust Executables..."
+        Description = "Suppresses security prompts for .exe, .bat, .zip, .7z, .iso downloaded files"
         CheckCode   = { (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Associations" -Name "LowRiskFileTypes" -ErrorAction SilentlyContinue).LowRiskFileTypes -ne $null }
         ApplyCode   = { reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Associations" /v "LowRiskFileTypes" /t REG_SZ /d ".exe;.bat;.cmd;.msi;.reg;.vbs;.ps1;.zip;.rar;.7z;.iso;.tar;.gz;.appx" /f | Out-Null }
         UndoCode    = { reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Associations" /v "LowRiskFileTypes" /f 2>$null | Out-Null }
@@ -223,7 +288,8 @@ $script:Tweaks = @(
         Id          = "HideZoneInfoProperties"
         Category    = "File Warnings"
         Title       = "Hide Security Check in Properties"
-        Description = "Hides 'Unblock' checkbox in file properties dialog"
+        ShortTitle  = "Hide Security Info..."
+        Description = "Hides 'Unblock' checkbox in file properties dialog for downloaded files"
         CheckCode   = { (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Name "HideZoneInfoOnProperties" -ErrorAction SilentlyContinue).HideZoneInfoOnProperties -eq 1 }
         ApplyCode   = { reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments" /v "HideZoneInfoOnProperties" /t REG_DWORD /d 1 /f | Out-Null }
         UndoCode    = { reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments" /v "HideZoneInfoOnProperties" /f 2>$null | Out-Null }
@@ -232,9 +298,62 @@ $script:Tweaks = @(
         Id          = "UnblockDownloadsFolder"
         Category    = "File Warnings"
         Title       = "Unblock All Files in Downloads"
-        Description = "Removes Zone.Identifier stream from files in Downloads folder"
+        ShortTitle  = "Unblock Downloads..."
+        Description = "Removes Zone.Identifier stream from all existing files in Downloads folder"
         CheckCode   = { $false }
         ApplyCode   = { Get-ChildItem -Path "$env:USERPROFILE\Downloads" -Recurse -ErrorAction SilentlyContinue | Unblock-File }
+        UndoCode    = { }
+    },
+
+    # BLOATWARE REMOVER TWEAKS (Point 1: UWP Bloatware Removal)
+    @{
+        Id          = "RemoveXboxBloat"
+        Category    = "Bloatware Remover"
+        Title       = "Remove Xbox Game Bar & Services"
+        ShortTitle  = "Remove Xbox..."
+        Description = "Uninstalls Xbox Game Bar, Xbox Speech to Text, and Xbox overlay packages"
+        CheckCode   = { -not (Get-AppxPackage -Name "*Microsoft.XboxGameOverlay*" -ErrorAction SilentlyContinue) }
+        ApplyCode   = { Get-AppxPackage -Name "*Xbox*" -ErrorAction SilentlyContinue | Remove-AppxPackage -ErrorAction SilentlyContinue }
+        UndoCode    = { }
+    },
+    @{
+        Id          = "RemoveWeatherNews"
+        Category    = "Bloatware Remover"
+        Title       = "Remove Weather & News Apps"
+        ShortTitle  = "Remove Weather..."
+        Description = "Uninstalls MSN Weather, News, and Money UWP app packages"
+        CheckCode   = { -not (Get-AppxPackage -Name "*BingWeather*" -ErrorAction SilentlyContinue) }
+        ApplyCode   = { Get-AppxPackage -Name "*BingWeather*", "*BingNews*", "*BingSports*" -ErrorAction SilentlyContinue | Remove-AppxPackage -ErrorAction SilentlyContinue }
+        UndoCode    = { }
+    },
+    @{
+        Id          = "RemoveSolitaire"
+        Category    = "Bloatware Remover"
+        Title       = "Remove Solitaire Collection"
+        ShortTitle  = "Remove Solitaire..."
+        Description = "Uninstalls pre-installed Microsoft Solitaire Collection game"
+        CheckCode   = { -not (Get-AppxPackage -Name "*MicrosoftSolitaireCollection*" -ErrorAction SilentlyContinue) }
+        ApplyCode   = { Get-AppxPackage -Name "*MicrosoftSolitaireCollection*" -ErrorAction SilentlyContinue | Remove-AppxPackage -ErrorAction SilentlyContinue }
+        UndoCode    = { }
+    },
+    @{
+        Id          = "RemoveMapsFeedback"
+        Category    = "Bloatware Remover"
+        Title       = "Remove Maps & Feedback Hub"
+        ShortTitle  = "Remove Maps..."
+        Description = "Uninstalls Windows Maps, Feedback Hub, and Get Help packages"
+        CheckCode   = { -not (Get-AppxPackage -Name "*WindowsMaps*" -ErrorAction SilentlyContinue) }
+        ApplyCode   = { Get-AppxPackage -Name "*WindowsMaps*", "*WindowsFeedbackHub*", "*GetHelp*" -ErrorAction SilentlyContinue | Remove-AppxPackage -ErrorAction SilentlyContinue }
+        UndoCode    = { }
+    },
+    @{
+        Id          = "RemovePhoneLink"
+        Category    = "Bloatware Remover"
+        Title       = "Remove Phone Link / Your Phone"
+        ShortTitle  = "Remove Phone Link..."
+        Description = "Uninstalls Phone Link (Your Phone) app package"
+        CheckCode   = { -not (Get-AppxPackage -Name "*YourPhone*" -ErrorAction SilentlyContinue) }
+        ApplyCode   = { Get-AppxPackage -Name "*YourPhone*" -ErrorAction SilentlyContinue | Remove-AppxPackage -ErrorAction SilentlyContinue }
         UndoCode    = { }
     }
 )
@@ -260,7 +379,8 @@ foreach ($app in $script:WingetApps) {
     $script:SelectedApps[$app.Id] = $false
 }
 
-$script:Categories = @("Presets", "Interface", "Security", "File Warnings", "Restore Points", "Winget Software")
+$script:AutoCreateRestorePoint = $true
+$script:Categories = @("Presets", "Interface", "Security & Privacy", "File Warnings", "Bloatware Remover", "Restore Points", "Winget Software")
 $script:ActiveCategoryIndex = 0
 $script:ActiveItemIndex = 0
 $script:FocusPanel = "CATEGORIES"
@@ -268,19 +388,20 @@ $script:FocusPanel = "CATEGORIES"
 # Load Presets
 $script:LocalPresets = @{
     "Gamer & Performance" = @{
-        Description = "Optimizes responsiveness, disables Bing, widgets, Copilot, Edge background."
+        Description = "Optimizes responsiveness, disables Bing, widgets, Copilot, Edge background, removes Xbox/Solitaire."
         Actions = @{
             "ClassicContextMenu" = "ENABLE"; "DisableBingSearch" = "ENABLE"; "DisableWidgets" = "ENABLE"
             "DisableCopilot" = "ENABLE"; "DisableEdgeBackground" = "ENABLE"; "DisableTaskbarAnimations" = "ENABLE"
-            "MenuShowDelayZero" = "ENABLE"
+            "MenuShowDelayZero" = "ENABLE"; "RemoveSolitaire" = "ENABLE"; "RemoveXboxBloat" = "ENABLE"
         }
     }
-    "Privacy & Security" = @{
-        Description = "Blocks Windows telemetry, recommendations, Defender toasts, Zone.Identifier file tags."
+    "Privacy & Hardening" = @{
+        Description = "Blocks Windows telemetry, ads, Defender toasts, Zone.Identifier tags, activity tracking."
         Actions = @{
             "DisableAdsAndTips" = "ENABLE"; "DisableDefenderToasts" = "ENABLE"; "DisableSaveZoneInformation" = "ENABLE"
             "LowRiskFileTypes" = "ENABLE"; "HideZoneInfoProperties" = "ENABLE"; "UnblockDownloadsFolder" = "ENABLE"
-            "SilentUAC" = "ENABLE"
+            "SilentUAC" = "ENABLE"; "DisableTelemetryData" = "ENABLE"; "DisableActivityHistory" = "ENABLE"
+            "DisableAdvertisingID" = "ENABLE"
         }
     }
     "Minimal Win10 Feel" = @{
@@ -340,7 +461,8 @@ function Draw-TUI {
     Write-Host $topLine
     
     $titlePart = "$BOLD$CYAN WIN11 TWEAKER v1.0$RESET"
-    $badgePart = "$GREEN[ADMIN: OK]$RESET  $CYAN[RESTORE POINT: READY]$RESET "
+    $rpStateStr = if ($script:AutoCreateRestorePoint) { "$GREEN[AUTO-RESTORE: ON]$RESET" } else { "$GRAY[AUTO-RESTORE: OFF]$RESET" }
+    $badgePart = "$GREEN[ADMIN: OK]$RESET  $rpStateStr "
     $hPad = 78 - (Get-VisibleLength $titlePart) - (Get-VisibleLength $badgePart)
     Write-Host "$CYAN$CH_V$RESET$titlePart$(" " * $hPad)$badgePart$CYAN$CH_V$RESET"
 
@@ -404,19 +526,25 @@ function Draw-TUI {
         } elseif ($catName -eq "Restore Points") {
             if ($i -eq 0) {
                 $isSel = ($script:ActiveItemIndex -eq 0)
-                $tStr = "[CREATE] Create New System Restore Point"
-                if ($isSel -and $script:FocusPanel -eq "ITEMS") { $rightItem = "$BG_CYAN> $tStr$RESET" }
-                elseif ($isSel) { $rightItem = "$CYAN$tStr$RESET" }
-                else { $rightItem = "  $tStr" }
+                $rpStateText = if ($script:AutoCreateRestorePoint) { "Toggle Auto-Restore Point (Status: ON)" } else { "Toggle Auto-Restore Point (Status: OFF)" }
+                if ($isSel -and $script:FocusPanel -eq "ITEMS") { $rightItem = "$BG_CYAN> [TOGGLE] $rpStateText$RESET" }
+                elseif ($isSel) { $rightItem = "$CYAN> [TOGGLE] $rpStateText$RESET" }
+                else { $rightItem = "  [TOGGLE] $rpStateText" }
             } elseif ($i -eq 1) {
                 $isSel = ($script:ActiveItemIndex -eq 1)
-                $tStr = "[OPEN] Launch Windows Restore GUI (rstrui)"
-                if ($isSel -and $script:FocusPanel -eq "ITEMS") { $rightItem = "$BG_CYAN> $tStr$RESET" }
-                elseif ($isSel) { $rightItem = "$CYAN$tStr$RESET" }
-                else { $rightItem = "  $tStr" }
+                $tStr = "Create System Restore Point Now"
+                if ($isSel -and $script:FocusPanel -eq "ITEMS") { $rightItem = "$BG_CYAN> [CREATE] $tStr$RESET" }
+                elseif ($isSel) { $rightItem = "$CYAN> [CREATE] $tStr$RESET" }
+                else { $rightItem = "  [CREATE] $tStr" }
+            } elseif ($i -eq 2) {
+                $isSel = ($script:ActiveItemIndex -eq 2)
+                $tStr = "Launch Windows System Restore GUI (rstrui)"
+                if ($isSel -and $script:FocusPanel -eq "ITEMS") { $rightItem = "$BG_CYAN> [OPEN] $tStr$RESET" }
+                elseif ($isSel) { $rightItem = "$CYAN> [OPEN] $tStr$RESET" }
+                else { $rightItem = "  [OPEN] $tStr" }
             }
         } else {
-            # Tweak Registry Category
+            # Tweak Registry & Bloatware Category
             $categoryTweaks = @($script:Tweaks | Where-Object { $_.Category -eq $catName })
             if ($i -lt $categoryTweaks.Count) {
                 $t = $categoryTweaks[$i]
@@ -430,9 +558,8 @@ function Draw-TUI {
                 }
                 
                 $sysState = if (& $t.CheckCode) { "$GREEN[SYS: ON]$RESET" } else { "$GRAY[SYS: OFF]$RESET" }
-                $tTitle = $t.Title
-                if ($tTitle.Length -gt 32) { $tTitle = $tTitle.Substring(0, 29) + "..." }
-                $tTitlePadded = $tTitle.PadRight(32)
+                $shortTitle = if ($t.ShortTitle) { $t.ShortTitle } else { $t.Title }
+                $tTitlePadded = $shortTitle.PadRight(26)
                 
                 if ($isSel -and $script:FocusPanel -eq "ITEMS") {
                     $rightItem = "$BG_CYAN> $actSymbol $tTitlePadded $sysState$RESET"
@@ -451,9 +578,9 @@ function Draw-TUI {
     $divMid = "$CYAN$CH_LT" + ($CH_H * 25) + $CH_CROSS + ($CH_H * 52) + "$CH_RT$RESET"
     Write-Host $divMid
 
-    # Description Line Format: Full Title FIRST, then explanation
+    # Description Line Format: FULL TITLE FIRST in brackets, then explanation
     $descText = "Hover over an item to view description."
-    if ($catName -in @("Interface", "Security", "File Warnings")) {
+    if ($catName -in @("Interface", "Security & Privacy", "File Warnings", "Bloatware Remover")) {
         $categoryTweaks = @($script:Tweaks | Where-Object { $_.Category -eq $catName })
         if ($script:ActiveItemIndex -lt $categoryTweaks.Count) {
             $t = $categoryTweaks[$script:ActiveItemIndex]
@@ -470,6 +597,10 @@ function Draw-TUI {
             $app = $script:WingetApps[$script:ActiveItemIndex]
             $descText = "APP: [$($app.Name)] - Package ID: $($app.Id)"
         }
+    } elseif ($catName -eq "Restore Points") {
+        if ($script:ActiveItemIndex -eq 0) { $descText = "INFO: [Auto-Restore Point Setting] - Toggle whether to auto-create a restore point before running tweaks." }
+        elseif ($script:ActiveItemIndex -eq 1) { $descText = "INFO: [Create Restore Point Now] - Instantly creates a System Restore Point." }
+        elseif ($script:ActiveItemIndex -eq 2) { $descText = "INFO: [System Restore GUI] - Opens Windows System Restore Wizard (rstrui.exe)." }
     }
     
     if ($descText.Length -gt 74) { $descText = $descText.Substring(0, 71) + "..." }
@@ -480,7 +611,7 @@ function Draw-TUI {
     $divBot = "$CYAN$CH_LT" + ($CH_H * 78) + "$CH_RT$RESET"
     Write-Host $divBot
 
-    $navHelp = "[Arrows/1-6] Move | [Tab/Left/Right] Switch Panel | [Space] Toggle | [Enter] Run"
+    $navHelp = "[Arrows/1-7] Move | [Tab/Left/Right] Switch Panel | [Space] Toggle | [Enter] Run"
     $navPadded = $navHelp.PadRight(76)
     Write-Host "$CYAN$CH_V$RESET $YELLOW$navPadded$RESET $CYAN$CH_V$RESET"
     
@@ -502,6 +633,11 @@ function Show-PreFlightScreen {
     $toRevert = @($script:Tweaks | Where-Object { $script:Selections[$_.Id] -eq "REVERT" })
     $selectedApps = @($script:WingetApps | Where-Object { $script:SelectedApps[$_.Id] -eq $true })
 
+    $rpStateStr = if ($script:AutoCreateRestorePoint) { "ENABLED (Will create before execution)" } else { "DISABLED (Skipped)" }
+    Write-Host "AUTO RESTORE POINT: $rpStateStr" -ForegroundColor Yellow
+    Write-Host "  (Press [R] on keyboard to toggle Restore Point ON/OFF)" -ForegroundColor Gray
+    Write-Host ""
+
     Write-Host "ITEMS TO ENABLE (+):" -ForegroundColor Green
     if ($toEnable.Count -eq 0) { Write-Host "  (None)" -ForegroundColor Gray }
     else { foreach ($item in $toEnable) { Write-Host "  [+] $($item.Title)" -ForegroundColor Green } }
@@ -518,12 +654,16 @@ function Show-PreFlightScreen {
     Write-Host ""
 
     Write-Host "-----------------------------------------------------------------" -ForegroundColor Gray
-    Write-Host "Press [ENTER] to Start Execution  |  Press [ESC] to Return & Edit" -ForegroundColor Yellow
+    Write-Host "[ENTER] Start Execution | [R] Toggle Restore Point | [ESC] Back" -ForegroundColor Yellow
 
     while ($true) {
         $key = [System.Console]::ReadKey($true)
         if ($key.Key -eq "Enter") {
             Execute-Tweaks
+            break
+        } elseif ($key.Key -eq "R") {
+            $script:AutoCreateRestorePoint = -not $script:AutoCreateRestorePoint
+            Show-PreFlightScreen
             break
         } elseif ($key.Key -eq "Escape") {
             break
@@ -542,10 +682,14 @@ function Execute-Tweaks {
     $timestamp = Get-Date -Format "yyyy-MM-dd_HHmmss"
     $logPath = "$env:USERPROFILE\Desktop\tweaker_log_$timestamp.txt"
 
-    # Auto Restore Point
-    Create-TweakerRestorePoint -Description "Tweaker_AutoBackup_$timestamp" | Out-Null
+    # Create Auto Restore Point if enabled
+    if ($script:AutoCreateRestorePoint) {
+        Create-TweakerRestorePoint -Description "Tweaker_AutoBackup_$timestamp" | Out-Null
+    } else {
+        Write-Host "Skipping System Restore Point creation (Disabled by user)." -ForegroundColor Gray
+    }
 
-    # Execute Registry Tweaks
+    # Execute Registry Tweaks & Bloatware Removal
     foreach ($tweak in $script:Tweaks) {
         $action = $script:Selections[$tweak.Id]
         if ($action -eq "ENABLE") {
@@ -612,8 +756,8 @@ while ($true) {
     Draw-TUI
     $key = [System.Console]::ReadKey($true)
 
-    # Number keys 1-6 for fast category jumping
-    if ($key.KeyChar -ge '1' -and $key.KeyChar -le '6') {
+    # Number keys 1-7 for fast category jumping
+    if ($key.KeyChar -ge '1' -and $key.KeyChar -le '7') {
         $idx = [int][string]$key.KeyChar - 1
         if ($idx -lt $script:Categories.Count) {
             $script:ActiveCategoryIndex = $idx
@@ -660,7 +804,7 @@ while ($true) {
                 $maxIdx = switch ($catName) {
                     "Presets" { [Math]::Max(0, $script:LocalPresets.Keys.Count - 1) }
                     "Winget Software" { $script:WingetApps.Count - 1 }
-                    "Restore Points" { 1 }
+                    "Restore Points" { 2 }
                     default { (@($script:Tweaks | Where-Object { $_.Category -eq $catName })).Count - 1 }
                 }
                 if ($script:ActiveItemIndex -lt $maxIdx) {
@@ -670,7 +814,7 @@ while ($true) {
         }
         "Spacebar" {
             $catName = $script:Categories[$script:ActiveCategoryIndex]
-            if ($catName -in @("Interface", "Security", "File Warnings")) {
+            if ($catName -in @("Interface", "Security & Privacy", "File Warnings", "Bloatware Remover")) {
                 $categoryTweaks = @($script:Tweaks | Where-Object { $_.Category -eq $catName })
                 if ($script:ActiveItemIndex -lt $categoryTweaks.Count) {
                     $t = $categoryTweaks[$script:ActiveItemIndex]
@@ -698,15 +842,21 @@ while ($true) {
                         }
                     }
                 }
+            } elseif ($catName -eq "Restore Points") {
+                if ($script:ActiveItemIndex -eq 0) {
+                    $script:AutoCreateRestorePoint = -not $script:AutoCreateRestorePoint
+                }
             }
         }
         "Enter" {
             $catName = $script:Categories[$script:ActiveCategoryIndex]
             if ($catName -eq "Restore Points") {
                 if ($script:ActiveItemIndex -eq 0) {
+                    $script:AutoCreateRestorePoint = -not $script:AutoCreateRestorePoint
+                } elseif ($script:ActiveItemIndex -eq 1) {
                     Create-TweakerRestorePoint -Description "User_Manual_Backup"
                     Start-Sleep -Seconds 2
-                } elseif ($script:ActiveItemIndex -eq 1) {
+                } elseif ($script:ActiveItemIndex -eq 2) {
                     Start-Process "rstrui.exe"
                 }
             } else {
