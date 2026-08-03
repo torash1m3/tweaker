@@ -1,3 +1,0 @@
-[00:08:36] [REVERT] [SUCCESS] Classic Win10 Context Menu
-[00:08:36] [ENABLE] [SUCCESS] Disable Taskbar Widgets
-[00:08:51] [WINGET] [SUCCESS] Telegram Desktop

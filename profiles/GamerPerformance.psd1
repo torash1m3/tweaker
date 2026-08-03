@@ -1,0 +1,1 @@
+@{Name='Gamer & Performance';Description='Responsiveness, clean interface and bloat removal';Extends=@();Tweaks=@{ClassicContextMenu='Apply';DisableBingSearch='Apply';DisableWidgets='Apply';DisableCopilot='Apply';DisableEdgeBackground='Apply';DisableTaskbarAnimations='Apply';MenuShowDelayZero='Apply';RemoveSolitaire='Apply';RemoveXboxBloat='Apply'};Packages=@()}

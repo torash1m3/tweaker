@@ -1,60 +1,75 @@
-# WIN11 TWEAKER v1.0
+# WIN11 TWEAKER v2.0
 
-A zero-dependency, single-command Terminal User Interface (TUI) Windows 11 system optimizer written in pure PowerShell 5.1 / 7+.
+Personal, zero-dependency Windows 11 bootstrap toolkit for PowerShell 5.1 and 7+.
+It is optimized for repeatable setup of a fresh personal system: registry policies,
+Appx cleanup, removal of Windows restrictions, Winget installation and exact registry rollback.
 
-![Windows 11](https://img.shields.io/badge/Windows-11-blue.svg) ![PowerShell](https://img.shields.io/badge/PowerShell-5.1%20%7C%207%2B-blueviolet.svg)
+## Usage
 
----
-
-## 🚀 One-Line Execution Command
-
-To run **WIN11 TWEAKER** on a clean Windows 11 system (no installation or external software required):
-
-Open **PowerShell as Administrator** and execute:
+Version 2 is modular, so clone or download the complete repository.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -Command "iwr -useb tinyurl.com/2327gboc | iex"
+.\tweaker.ps1                                      # interactive TUI
+.\tweaker.ps1 -Mode Inspect                        # read-only inspection
+.\tweaker.ps1 -Mode Plan -Profile FreshInstall     # read-only preview
+.\tweaker.ps1 -Mode Apply -Profile FreshInstall    # apply, self-elevates
+.\tweaker.ps1 -Mode Revert -Snapshot .\state\ID.json
 ```
 
-> **Full Raw Link:** `https://raw.githubusercontent.com/torash1m3/tweaker/main/tweaker.ps1`
-
----
-
-## ✨ Features
-
-- **3-State Toggle Engine (`Space` bar):**
-  - `[+] ENABLE` — Apply registry tweak / optimization
-  - `[-] REVERT` — Restore Windows default setting
-  - `[ ] SKIP` — Leave setting untouched
-- **Live System State Inspection (`[SYS: ON]` / `[SYS: OFF]`):** Automatically detects which registry keys are currently active in your Windows system.
-- **Developer Presets:** Gamer & Performance, Privacy & Security Hardening, Minimal Win10 Feel.
-- **System Restore Point Manager:** Create, launch GUI (`rstrui`), or manage restore points with automatic 24-hour frequency bypass.
-- **Winget Package Installer:** 1-click silent unattended installation for 7-Zip, Chrome, Telegram, VS Code, VLC.
-- **Pre-Flight Confirmation Screen:** Review scheduled actions before applying.
-- **Real-time Console Logging & Desktop Log Export:** Automatically saves `tweaker_log_<timestamp>.txt` to user's Desktop.
-
----
-
-## 📁 Repository Structure
+## Architecture
 
 ```text
-tweaker/
-├── tweaker.ps1              # Main entry point & TUI Engine
-├── config.json              # App metadata and defaults
-├── presets/                 # Developer Presets folder
-│   ├── gamer_performance.json
-│   ├── privacy_hardening.json
-│   └── minimal_win10.json
-├── implementation_plan.md   # Architectural specification
-└── README.md                # Project documentation
+tweaker.ps1               Minimal CLI/bootstrap
+config.json               Runtime defaults
+src/Core.ps1              Catalog, profiles, plans, snapshots and execution
+src/Providers.ps1         Registry, Appx, files, Winget and restore points
+src/Tui.ps1               Interactive console client
+tweaks/*.psd1             Declarative tweak catalog
+profiles/*.psd1           Personal profiles
+data/winget-apps.psd1     Winget package catalog
+state/                    Machine snapshots (Git ignored)
+logs/                     JSON execution logs (Git ignored)
+tests/Validation.Tests.ps1 Read-only tests without Pester
 ```
 
----
+The TUI and CLI use the same engine. UI code never changes the system directly.
 
-## 🛠️ Short Link Options
+## Profiles
 
-- **TinyURL (Active Shortener):** `https://tinyurl.com/2327gboc`
-- **Short Command:**
-  ```powershell
-  powershell -ExecutionPolicy Bypass -Command "iwr -useb tinyurl.com/2327gboc | iex"
-  ```
+- `FreshInstall` — complete clean-system baseline.
+- `Gamer & Performance` — responsiveness and bloat cleanup.
+- `Privacy & Hardening` — telemetry, notifications and restrictions off.
+- `Minimal Win10 Feel` — classic menu, silent UAC and no widgets.
+
+Profiles may inherit other profiles through `Extends` and override actions by tweak ID.
+
+## State and rollback
+
+Before applying reversible registry tweaks, the engine records whether each key/value
+existed, its type and exact value. Revert restores that snapshot instead of guessing
+Windows defaults. Appx removal and removal of Zone.Identifier streams are marked
+irreversible, so the UI does not offer a fake rollback.
+
+## Validation
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tests\Validation.Tests.ps1
+```
+
+Validation parses every PowerShell file, imports the module, and checks tweak IDs,
+profile references and catalog structure. It never applies system changes.
+
+## Adding a registry tweak
+
+Add a record to `tweaks/*.psd1`:
+
+```powershell
+@{
+    Id='ExampleTweak'; Category='Interface'; Title='Example tweak'
+    Description='What it changes'; Provider='Registry'; Reversible=$true
+    Restart='Explorer'
+    Operations=@(@{Path='HKCU:\Software\Example';Name='Enabled';Type='DWord';Value=0})
+}
+```
+
+Run validation after changing the catalog or profiles.

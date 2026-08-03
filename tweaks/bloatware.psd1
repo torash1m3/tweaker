@@ -1,0 +1,7 @@
+@{ Tweaks = @(
+@{Id='RemoveXboxBloat';Category='Bloatware Remover';Title='Remove Xbox Game Bar & Services';Description='Removes Xbox application packages';Provider='Appx';Reversible=$false;Restart='None';Packages=@('*Microsoft.XboxGameOverlay*','*Microsoft.XboxGamingOverlay*','*Microsoft.XboxSpeechToTextOverlay*')},
+@{Id='RemoveWeatherNews';Category='Bloatware Remover';Title='Remove Weather & News Apps';Description='Removes Weather, News and Sports packages';Provider='Appx';Reversible=$false;Restart='None';Packages=@('*BingWeather*','*BingNews*','*BingSports*')},
+@{Id='RemoveSolitaire';Category='Bloatware Remover';Title='Remove Solitaire Collection';Description='Removes Microsoft Solitaire Collection';Provider='Appx';Reversible=$false;Restart='None';Packages=@('*MicrosoftSolitaireCollection*')},
+@{Id='RemoveMapsFeedback';Category='Bloatware Remover';Title='Remove Maps & Feedback Hub';Description='Removes Maps, Feedback Hub and Get Help';Provider='Appx';Reversible=$false;Restart='None';Packages=@('*WindowsMaps*','*WindowsFeedbackHub*','*GetHelp*')},
+@{Id='RemovePhoneLink';Category='Bloatware Remover';Title='Remove Phone Link / Your Phone';Description='Removes Phone Link';Provider='Appx';Reversible=$false;Restart='None';Packages=@('*YourPhone*')}
+)}

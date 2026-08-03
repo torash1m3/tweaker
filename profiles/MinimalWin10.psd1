@@ -1,0 +1,1 @@
+@{Name='Minimal Win10 Feel';Description='Classic menu, silent UAC and no widgets';Extends=@();Tweaks=@{ClassicContextMenu='Apply';SilentUAC='Apply';DisableWidgets='Apply'};Packages=@()}

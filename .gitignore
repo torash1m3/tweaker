@@ -1,0 +1,6 @@
+logs/*
+!logs/.gitkeep
+state/*
+!state/.gitkeep
+tweaker_log_*.txt
+*.tmp
