@@ -159,6 +159,13 @@ Invoke-Check 'Built-in catalog validator succeeds' {
     Assert-True ([bool]$valid) 'Test-TweakerCatalog reported validation errors'
 }
 
+Invoke-Check 'Execution path is compatible with Windows PowerShell 5.1' {
+    $corePath = Join-Path $ProjectRoot 'src\Core.ps1'
+    $coreSource = Get-Content -LiteralPath $corePath -Raw
+    Assert-True ($coreSource -match 'Stop-Process\s+-Name\s+explorer') 'Explorer restart must bind explorer through the explicit -Name parameter'
+    Assert-True ($coreSource -notmatch 'Generic\.List\[object\]') 'Generic List[object] cannot safely be array-wrapped in Windows PowerShell 5.1'
+}
+
 if ($null -ne $module) { Remove-Module -ModuleInfo $module -Force -ErrorAction SilentlyContinue }
 Write-Host ("Validation completed: {0} failure(s)." -f $script:Failures)
 if ($script:Failures -gt 0) { exit 1 }

@@ -79,7 +79,7 @@ function Invoke-TweakerPlan {
     [CmdletBinding(SupportsShouldProcess=$true)] param([Parameter(Mandatory=$true)]$Plan,[switch]$NoRestorePoint)
     Assert-TweakerAdministrator
     $snapshot=[ordered]@{Id=$Plan.Id;Created=(Get-Date).ToString('o');Machine=$env:COMPUTERNAME;Entries=@()}
-    $results=New-Object System.Collections.Generic.List[object]; $restartExplorer=$false
+    $results=@(); $restartExplorer=$false
     if (-not $NoRestorePoint -and $script:Config.AutoCreateRestorePoint) { $null=New-TweakerRestorePoint "Tweaker_$($Plan.Id)" }
     foreach ($entry in $Plan.Actions) {
         if ($entry.Action -eq 'Skip') { continue }
@@ -94,13 +94,13 @@ function Invoke-TweakerPlan {
                 $result=Invoke-ProviderApply $entry.Tweak
                 if ($result.Success -and (Get-ProviderState $entry.Tweak) -ne 'Applied') { throw 'Post-apply validation failed' }
             }
-            $results.Add([pscustomobject]@{Id=$entry.Tweak.Id;Action=$entry.Action;Success=$result.Success;Message=$result.Message})
+            $results += [pscustomobject]@{Id=$entry.Tweak.Id;Action=$entry.Action;Success=$result.Success;Message=$result.Message}
             if ($result.Success -and $entry.Tweak.Restart -eq 'Explorer') { $restartExplorer=$true }
-        } catch { $results.Add([pscustomobject]@{Id=$entry.Tweak.Id;Action=$entry.Action;Success=$false;Message=$_.Exception.Message}) }
+        } catch { $results += [pscustomobject]@{Id=$entry.Tweak.Id;Action=$entry.Action;Success=$false;Message=$_.Exception.Message} }
     }
     Save-TweakerSnapshot $snapshot
-    foreach ($package in @($Plan.Packages)) { $results.Add((Install-TweakerPackage $package)) }
-    if ($restartExplorer -and $script:Config.RestartExplorer) { Stop-Process explorer -Force -ErrorAction SilentlyContinue; Start-Process explorer.exe }
+    foreach ($package in @($Plan.Packages)) { $results += Install-TweakerPackage $package }
+    if ($restartExplorer -and $script:Config.RestartExplorer) { Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue; Start-Process -FilePath explorer.exe }
     $execution=[pscustomobject]@{Id=$Plan.Id;Profile=$Plan.Profile;Results=@($results);Snapshot=(Get-SnapshotPath $Plan.Id)}
     Save-TweakerLog $execution
     $execution
